@@ -1,0 +1,1579 @@
+openapi: 3.0.3
+info:
+  title: SeaNews API
+  description: |-
+    This is an API documentation for SeaNews news portal created for the purpose of fulfilling the Digitalent Batch 03 Final Project.
+    
+    The repository for this API is stored in [Repository Link](https://git.garena.com/sea-labs-id/batch-03/tafia-alifianty/final-project-backend)
+  contact:
+    email: tafia.putri@shopee.com
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+  # deployed url
+tags:
+  - name: Authentication
+    description: API for accesing SeaNews App
+  - name: Users
+    description: API for accesing user's information
+  - name: Posts
+    description: API for accesing the app's posts about recent news
+  - name: Invoices
+    description: API for accesing invoices regarding the transactions in the app
+  - name: Subscriptions
+    description: API for accesing subscriptions
+  - name: Gifts
+    description: API for accesing gifts
+  - name: Vouchers
+paths:
+  /register:
+    post:
+      tags:
+        - Authentication
+      summary: Create a new member account
+      description: Create a new member account by using name, email, address, and password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+              - type: object
+                properties:
+                  fullname:
+                    type: string
+                    example: Example Fullname
+                  address:
+                    type: string
+                    example: Example address
+              - $ref: '#/components/schemas/EmailPassword'
+      responses:
+        '201':
+          description: Account created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CreatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        allOf:
+                          - $ref: '#/components/schemas/LoginData'
+                          - type: object
+                            properties:
+                              fullname:
+                                type: string
+                                example: fullname
+                              address:
+                                type: string
+                                example: address
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: Login to an account
+      description: Login to an account using email and password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailPassword'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CreatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        allOf:
+                          - $ref: '#/components/schemas/LoginData'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /refresh:
+    get:
+      tags:
+        - Authentication
+      summary: Refresh Access Token
+      description: Refresh Access Token with refresh token put in authorization with format 'Bearer <refresh_token>'
+      responses:
+        '200':
+          description: Refresh successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: access_token
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /users/profile:
+    get:
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      summary: Get user profile
+      description: Get user profile
+      responses:
+        '200':
+          description: Profile successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - type: object
+                    properties:
+                      data:
+                          $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    patch:
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      summary: Update user profile
+      description: Update user profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullname:
+                  type: string
+                  example: full name
+                address:
+                  type: string
+                  example: address
+      responses:
+        '200':
+          description: Profile successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - type: object
+                    properties:
+                      data:
+                          $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /users/histories:
+    get:
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      summary: Get user reading histories
+      description: Get user reading histories on the news that are in the app
+      responses:
+        '200':
+          description: Histories successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ReadingHistory'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /users/subscriptions:
+    get:
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      summary: Get user subscriptions
+      description: Get user subscriptions while using the app
+      responses:
+        '200':
+          description: Subscriptions successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserSubscription'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /users/invoices:
+    get:
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      summary: Get user invoices
+      description: Get user invoices for all of their transaction
+      responses:
+        '200':
+          description: Invoices successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Invoice'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /users/gifts:
+    get:
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      summary: Get User Gifts Tracking
+      description: Get User Gifts Tracking
+      responses:
+        '200':
+          description: User Gifts Tracking successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserGift'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /users/referrals:
+    get:
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      summary: Get Users that referred the user request
+      description: Get Users that referred the user request
+      responses:
+        '200':
+          description: User Referred successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            email:
+                              type: string
+                              example: email
+                            fullname:
+                              type: string
+                              example: fullname
+                            address:
+                              type: string
+                              example: address
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /users/vouchers:
+    get:
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      summary: Get User /users/vouchers:s
+      description: Get User voucher
+      responses:
+        '200':
+          description: User vouchers successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserVoucher'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /admin/posts:
+    post:
+      tags:
+        - Posts
+      security:
+        - bearerAuth: []
+      summary: Create a new news post
+      description: Create a new news post. The API can only accessed by a user with admin role
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostRequestBody'
+      responses:
+        '201':
+          description: Post created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CreatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /posts:
+    get:
+      tags:
+        - Posts
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: s
+          in: query
+          description: Query to filter posts which has title that contains the query
+          required: false
+          schema:
+            type: string
+            default: title
+        - name: sort
+          in: query
+          description: Query to sort post ascending or descending by date
+          required: false
+          explode: true
+          schema:
+            type: string
+            default: desc
+            enum:
+              - desc
+              - asc
+        - name: category
+          in: query
+          description: Query to filter posts by its category
+          required: false
+          schema:
+            type: integer
+            example: 1
+        - name: type
+          in: query
+          description: Query to filter posts by its type
+          required: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          description: Query to limit maximum posts retrieved
+          required: false
+          schema:
+            type: integer
+            default: 10
+        - name: page
+          in: query
+          description: Query to get page of posts partisized by the limit query
+          required: false
+          schema:
+            type: integer
+            default: 1
+      summary: Get All Post
+      description: Get All Posts in the app with provided query
+      responses:
+        '200':
+          description: Invoices successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - $ref: '#/components/schemas/Pagination'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Post'
+                      
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /posts/trending:
+    get:
+      tags:
+        - Posts
+      security:
+        - bearerAuth: []
+      summary: Get All Trending Post
+      description: Get a maximum of 5 trending posts according to the user's or all of the users preference (if current user doesn't have any data)
+      responses:
+        '200':
+          description: Trending posts successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Post'
+                      
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /posts/recommendations:
+    get:
+      tags:
+        - Posts
+      security:
+        - bearerAuth: []
+      summary: Get All Recommendations Post
+      description: Get a maximum of 3 Recommendations posts according to the user's or all of the users preference (if current user doesn't have any data)
+      responses:
+        '200':
+          description: Recommendations posts successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Post'
+                      
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /posts/{id}:
+    get:
+      tags:
+        - Posts
+      security:
+        - bearerAuth: []
+      summary: Find post by ID
+      description: Returns a single post. If the user who request the API is a member, it will also return their reading history of that post if exists
+      parameters:
+        - name: id
+          in: path
+          description: ID of post
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Post successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Post'
+                  - $ref: '#/components/schemas/ReadingHistory'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /admin/posts/{id}:
+    delete:
+      tags:
+        - Posts
+      security:
+        - bearerAuth: []
+      summary: Delete a post by ID
+      description: Deletes a post
+      parameters:
+        - name: id
+          in: path
+          description: ID of post
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Post successfully deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /posts/like/{id}:
+    patch:
+      tags:
+        - Posts
+      security:
+        - bearerAuth: []
+      summary: Likes a post by ID
+      description: Likes or unlikes a Post according to previous history of the user who requested
+      parameters:
+        - name: id
+          in: path
+          description: ID of post
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Post successfully liked/unliked
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Post'
+                  - $ref: '#/components/schemas/ReadingHistory'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /posts/share/{id}:
+    patch:
+      tags:
+        - Posts
+      security:
+        - bearerAuth: []
+      summary: Shares a post by ID
+      description: Shares a Post. If have not previously shared, it will update user reading history of that post and increment post shared count
+      parameters:
+        - name: id
+          in: path
+          description: ID of post
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Post successfully shared
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Post'
+                  - $ref: '#/components/schemas/ReadingHistory'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /posts/types:
+    get:
+      tags:
+        - Posts
+      security:
+        - bearerAuth: []
+      summary: Get All Post Types
+      description: Get All Post Types
+      responses:
+        '200':
+          description: Post Types successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: VIP
+                            quota:
+                              type: integer
+                              example: 10
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /posts/categories:
+    get:
+      tags:
+        - Posts
+      security:
+        - bearerAuth: []
+      summary: Get All Post Categories
+      description: Get All Post Categories
+      responses:
+        '200':
+          description: Post Categories successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: Finance
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /invoices:
+    post:
+      tags:
+        - Invoices
+      security:
+        - bearerAuth: []
+      summary: Create a new invoice
+      description: Create a new invoice with status WAITING when a member wants to buy a subscription
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                total:
+                  type: integer
+                  example: 90000
+                subscription_id:
+                  type: integer
+                  example: 1
+      responses:
+        '201':
+          description: Invoice created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CreatedResponse'
+                  - $ref: '#/components/schemas/Invoice'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /admin/invoices:
+    get:
+      tags:
+        - Invoices
+      security:
+        - bearerAuth: []
+      summary: Get All Invoices
+      description: Get All Invoices in the app
+      responses:
+        '200':
+          description: Invoices successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Invoice'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /invoices/user/{code}:
+    get:
+      tags:
+        - Invoices
+      security:
+        - bearerAuth: []
+      summary: Get Invoices by code of a certain user
+      description: Get Invoices by code of a certain user. If other user tries to access the invoice by other user's code, it will be rejected
+      parameters:
+        - name: code
+          in: path
+          description: Code of invoice
+          required: true
+          schema:
+            type: string
+            example: INV-2-100031
+      responses:
+        '200':
+          description: Invoice successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - $ref: '#/components/schemas/Invoice'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /invoices/{invoiceCode}:
+    get:
+      tags:
+        - Invoices
+      security:
+        - bearerAuth: []
+      summary: Get Invoices by code
+      description: Get Invoices by code. This API can be accessed without logging in and is used for payment
+      parameters:
+        - name: invoiceCode
+          in: path
+          description: Code of invoice
+          required: true
+          schema:
+            type: string
+            example: INV-2-100031
+      responses:
+        '200':
+          description: Invoice successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - $ref: '#/components/schemas/Invoice'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /invoices/{code}:
+    patch:
+      tags:
+        - Invoices
+      security:
+        - bearerAuth: []
+      summary:  Updates invoice status by Code
+      description: Updates invoice status from WAiting to PROCESSED. Can only be performed by member after they paid for the invoice
+      parameters:
+        - name: code
+          in: path
+          description: Code of invoice
+          required: true
+          schema:
+            type: string
+            example: INV-2-100031
+      responses:
+        '200':
+          description: Invoice successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /admin/invoices/{code}:
+    patch:
+      tags:
+        - Invoices
+      security:
+        - bearerAuth: []
+      summary:  Updates invoice status by Code
+      description: Updates invoice status that has been paid from PROCESSED to either COMPLETED or REJECTED. Can only be performed by admin
+      parameters:
+        - name: code
+          in: path
+          description: Code of invoice
+          required: true
+          schema:
+            type: string
+            example: INV-2-100031
+      responses:
+        '200':
+          description: Invoice successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /subscriptions:
+    get:
+      tags:
+        - Subscriptions
+      security:
+        - bearerAuth: []
+      summary: Get All Subscriptions
+      description: Get All Subscriptions
+      responses:
+        '200':
+          description: Subscriptions successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Subscription'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /admin/gifts:
+    get:
+      tags:
+        - Gifts
+      security:
+        - bearerAuth: []
+      summary: Get All Gifts
+      description: Get All Gifts in the app
+      responses:
+        '200':
+          description: Gifts successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Gift'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /admin/gifts/users:
+    get:
+      tags:
+        - Gifts
+      security:
+        - bearerAuth: []
+      summary: Get All User Gifts Tracking
+      description: Get All User Gifts Tracking
+      responses:
+        '200':
+          description: User Gifts Tracking successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserGift'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /admin/gifts/users/{id}:
+    patch:
+      tags:
+        - Gifts
+      security:
+        - bearerAuth: []
+      summary:  Updates User Gifts Tracking by ID
+      description: Updates User Gifts Tracking by ID from PROCESSED to either COMPLETED or CANCELLED. Can only be performed by admin
+      parameters:
+        - name: id
+          in: path
+          description: id of user gift tracking, in format <user_id>-<gift_id>-<month>-<year>-
+          required: true
+          schema:
+            type: string
+            example: 1-1-10-2022
+      responses:
+        '200':
+          description: User Gifts Tracking successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGift'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /admin/gifts/stock/{id}:
+    patch:
+      tags:
+        - Gifts
+      security:
+        - bearerAuth: []
+      summary:  Updates Gift's stock by ID
+      description: Updates Gift's stock by ID. Can only be performed by admin
+      parameters:
+        - name: id
+          in: path
+          description: id of gift
+          required: true
+          schema:
+            type: string
+            example: 1-1-10-2022
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stock:
+                  type: integer
+                  example: 10
+      responses:
+        '200':
+          description: User Gifts Tracking successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGift'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /vouchers:
+    get:
+      tags:
+        - Vouchers
+      security:
+        - bearerAuth: []
+      summary: Get All Vouchers
+      description: Get All Vouchers
+      responses:
+        '200':
+          description: Vouchers successfully retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OKResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Voucher'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  responses:
+    InvalidRequestBody:
+        description: Invalid Request Body
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/InvalidRequestBodyResponse'
+    BadRequest:
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/BadRequestResponse'
+    Unauthorized:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/UnauthorizedResponse'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ForbiddenResponse'
+    NotFound:
+        description: NotFound
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/NotFoundResponse'
+    InternalServerError:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/InternalServerErrorResponse'
+  schemas:
+    CreatedResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 201
+        message:
+          type: string
+          example: created
+        is_error:
+          type: boolean
+          example: false
+    OKResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: OK
+        is_error:
+          type: boolean
+          example: false
+    InvalidRequestBodyResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Request body is invalid
+        data:
+          type: object
+          nullable: true
+        is_error:
+          type: boolean
+          example: false
+    BadRequestResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Request body is invalid
+        data:
+          type: object
+          nullable: true
+        is_error:
+          type: boolean
+          example: true
+    UnauthorizedResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 401
+        message:
+          type: string
+          example: unathorized
+        data:
+          type: object
+          nullable: true
+        is_error:
+          type: boolean
+          example: true
+    ForbiddenResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 403
+        message:
+          type: string
+          example: forbidden
+        data:
+          type: object
+          nullable: true
+        is_error:
+          type: boolean
+          example: true
+    NotFoundResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 401
+        message:
+          type: string
+          example: Not Found
+        data:
+          type: object
+          nullable: true
+        is_error:
+          type: boolean
+          example: true
+    InternalServerErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 500
+        message:
+          type: string
+          example: Internal Server Error
+        data:
+          type: object
+          nullable: true
+        is_error:
+          type: boolean
+          example: true
+    EmailPassword:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: example@email.com
+        password:
+          type: string
+          example: password
+    LoginData:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        email:
+          type: string
+          format: email
+          example: email@email.com
+        access_token:
+          type: string
+          example: access_token
+        refresh_token:
+          type: string
+          example: refresh_token
+    CreatePostRequestBody:
+      type: object
+      properties:
+        title:
+          type: string
+          example: title
+        summary:
+          type: string
+          example: summary
+        content:
+          type: string
+          example: content
+        category_id:
+          type: integer
+          example: 1
+        type_id:
+          type: integer
+          example: 1
+        author_name:
+          type: string
+          example: author_name
+        img_url:
+          type: string
+          example: img_url
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        email:
+          type: string
+          format: email
+          example: example@email.com
+        role:
+          type: string
+          example: member
+        fullname:
+          type: string
+          example: fullname
+        address:
+          type: string
+          example: address
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: title
+        slug:
+          type: string
+          example: this-is-a-slug
+        content:
+          type: string
+          example: content
+        summary:
+          type: string
+          example: summary
+        category:
+          type: string
+          example: Finance
+        category_id:
+          type: integer
+          example: 1
+        type:
+          type: string
+          example: VIP
+        type_id:
+          type: integer
+          example: 1
+        author_name:
+          type: string
+          example: author_name
+        like_count:
+          type: integer
+          example: 1
+        share_count:
+          type: integer
+          example: 1
+        created_at:
+          type: string
+          example: 2022-10-29 09:52:43.837969+00
+    ReadingHistory:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        last_accessed:
+          type: string
+          example: 2022-10-29 09:52:43.837969+00
+        is_liked:
+          type: boolean
+          example: false
+        is_shared:
+          type: boolean
+          example: false
+        post:
+          $ref: '#/components/schemas/Post'
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: name
+        price:
+          type: integer
+          example: 90000
+        quota:
+          type: integer
+          example: 10
+    UserSubscription:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        subscription_id:
+          type: integer
+          example: 1
+        subscription:
+          $ref: '#/components/schemas/Subscription'
+        remaining_quota:
+          type: integer
+          example: 1
+        status:
+          type: string
+          example: WAITING
+        date_started:
+          type: string
+          example: 2022-10-29 09:52:43.837969+00
+        date_ended:
+          type: string
+          example: 2022-10-29 09:52:43.837969+00
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 1
+        user_email:
+          type: string
+          example: email@email.com
+        status:
+          type: string
+          example: WAITING
+        total:
+          type: integer
+          example: 1
+        subscription_id:
+          type: integer
+          example: 1
+        subscription_plan:
+          type: string
+          example: gold
+        paid_at:
+          type: string
+          example: 2022-10-29 09:52:43.837969+00
+        purchased_at:
+          type: string
+          example: 2022-10-29 09:52:43.837969+00
+    Gift:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: name
+        stock:
+          type: integer
+          example: 1
+        updated_at:
+          type: string
+          example: 2022-10-29 09:52:43.837969+00
+    UserGift:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          example: 1
+        user_email:
+          type: string
+          example: email
+        gift_id:
+          type: integer
+          example: 1
+        gift_email:
+          type: string
+          example: email
+        month:
+          type: integer
+          example: 1
+        year:
+          type: integer
+          example: 2022
+        status:
+          type: string
+          example: PROCESSED
+    Voucher:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: name
+        discount:
+          type: integer
+          example: 10000
+        minimum_spending:
+          type: integer
+          example: 10000
+    UserVoucher:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        code:
+          type: string
+          example: code
+        received_from_user_id:
+          type: integer
+          example: 1
+        received_from_user_email:
+          type: string
+          example: email
+        voucher_id:
+          type: integer
+          example: 1
+        Voucher:
+          type: object
+          $ref: '#/components/schemas/Voucher'
+        date_received:
+          type: string
+          example: 2022-10-29 09:52:43.837969+00
+        valid_until:
+          type: string
+          example: 2022-10-29 09:52:43.837969+00
+        is_valid:
+          type: boolean
+          example: false
+        status:
+          type: string
+          example: AVAILABLE
+    Pagination:
+      type: object
+      properties:
+        per_page:
+          type: integer
+          example: 1
+        current_page:
+          type: integer
+          example: 1
+        total:
+          type: integer
+          example: 1
+        total_pages:
+          type: integer
+          example: 1
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    
