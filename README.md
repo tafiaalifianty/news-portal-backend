@@ -4,7 +4,7 @@ Created by Tafia Alifianty Dinita Putri
 
 ## Description
 
-This is an API documentation for Sea News API created for the purpose of fulfilling the Digitalent Batch 03 Final Project. This API is deployed to []() as long as the deployment is still available. See []() for the documentation
+This is an API documentation for Sea News API.
 
 ## How to Run Locally
 
