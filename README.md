@@ -1,10 +1,10 @@
-# Sea News API
+# SeaNews API
 
 Created by Tafia Alifianty Dinita Putri
 
 ## Description
 
-This is an API documentation for Sea News API.
+This is an API documentation for SeaNews API.
 
 ## How to Run Locally
 
